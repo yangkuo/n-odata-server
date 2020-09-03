@@ -1,3 +1,6 @@
+__This project will no be longer maintained cause of lack of interest, external support and external contribution. At the other side SAP, my main use case for this, developed [CAP](https://cap.cloud.sap/docs/) which solves my motivation for this repository.  
+I'm sorry for that. You can use this repository as is or feel free to fork and enhance it.__
+
 # n-odata-server, The node OData server for the loopback framework
 
 This project has been started to develop an [OData](http://www.odata.org/) server for node.js.
@@ -6,20 +9,6 @@ There are already some solutions at npm. These did not fulfill our requirements 
 * Support for several backend systems (databases)
 * Support for local file system database (light weight)
 * Support for nearly the complete OData API
-
-## Current state of the project
-__Even though we are working hard we need some more time to have a version that
-supports most of the OData specification.
-Please stay tuned or contribute to the project if you want quicker results.__
-
-If you want to contribute send us an email to [`h.tammen@tammen-it-solutions.de`](mailto:h.tammen@tammen-it-solutions.de).
-We are collaborating via a [Slack Team](https://slack.com/) and will invite you to this as soon as we receive a request for contribution.
-We manage our tasks via [zube.io](https://zube.io). We will also authorize you to our zube scrum board if you want to contribute to the project.
-
-We have currently implemented some very basic OData functionality (see below) that allows you to use some basic CRUD operations on your data. We try to implement some more useful functionality soon.
-
-### Release Notes
-To see what's implemented yet have a look at our [release notes](https://github.com/htammen/n-odata-server/wiki/Release%20Notes)
 
 ## Background
 
@@ -68,13 +57,66 @@ of your project. Add the following lines to this file
 ```
   "n-odata-server": {
     "path": "/odata/*",
-    "odataversion": "2"
+    "odataversion": "2",
+    "useViaMiddleware": true
   }
 ```
-If you are not happy with the prefix `odata` you can of course use another one. Just exchange `odata` with you prefix
-e.g. `myservice`. Then your requests to the odata service have to start with `/myservice/`.
 The line `"odataversion": "2"` means that the server works with OData V2. We highly recommend to use this version at the
 moment.
+
+Additionally you have to add route handling information to the file  
+`server/middleware.json`  
+An example of the configuration you see here:
+```
+{
+  "initial:before": {
+    "loopback#favicon": {}
+  },
+  "initial": {
+    "compression": {},
+    "cors": {
+      "params": {
+        "origin": true,
+        "credentials": true,
+        "maxAge": 86400
+      }
+    }
+  },
+  "session": {},
+  "auth": {},
+  "parse": {},
+	"routes": {
+		"n-odata-server#odata": {
+			"paths": [
+				"/odata/*"
+			]
+		},
+		"loopback#rest": {
+			"paths": [
+				"${restApiRoot}"
+			]
+		}
+	},
+  "files": {
+    "loopback#static": {
+      "params": "$!../client"
+    }
+  },
+  "final": {
+    "loopback#urlNotFound": {}
+  },
+  "final:after": {
+    "loopback#errorHandler": {}
+  }
+}
+
+```
+With this configuration you can use the `odata` prefix to execute OData calls and the `api` prefix (loopback default) to execute standard restful json calls.
+If you are not happy with the prefix `odata` you can of course use another one. Just exchange `odata` with your prefix in the `paths` array.
+e.g. `myservice`. Then your requests to the odata service have to start with `/myservice/`.
+
+See express documentation for more details on defining routes.
+
 
 ### Firing OData requests
 To fire your OData request simply start your server application with
@@ -162,6 +204,10 @@ Currently we don't support
 flag
 * Atom / XML request. As mentioned above we only support JSON.
 
+### Authentication and Authorization
+n-odata-server leverages the authentication and authorization mechanisms supplied by loopback. 
+We have provided a [wiki page](https://github.com/htammen/n-odata-server/wiki/authorization) to help you get started easily with this topic.
+
 ### Logging
 We use [log4js](https://github.com/nomiddlename/log4js-node) for internal logging purposes.
 Per default we log to the console and to a file named `n_odata_server.log` that is created in the root directory of your
@@ -194,6 +240,27 @@ look at this [presentation](http://prezi.com/dznggtj0zjlo/?utm_campaign=share&ut
 
 ## Tutorials
 Have a look at our [wiki page](https://github.com/htammen/n-odata-server/wiki) for tutorials that demonstrate the usage of n-odata-server.
+
+## Current state of the project
+__Even though we are working hard we need some more time to have a version that
+supports most of the OData specification.
+Please stay tuned or contribute to the project if you want quicker results.__
+
+We have currently implemented some but not all OData functionality (see below). You should be able to use most of the basic CRUD operations
+on your data. We try to implement some more useful functionality as soon as possible. Additionally we make currently available functionality
+more stable every day.
+
+### Release Notes
+To see what's implemented yet have a look at our [release notes](CHANGELOG.md)
+
+## Contribute
+If you want to contribute send us an email to [`h.tammen@tammen-it-solutions.de`](mailto:h.tammen@tammen-it-solutions.de).
+We are collaborating / communication via [Slack](https://slack.com/) and will invite you to our team as soon as we receive a request for contribution.
+We manage our tasks via [zube.io](https://zube.io). We will also authorize you to our zube scrum board if you want to contribute to the project.
+
+You can also have a look at the [DEV_NOTES.md](DEV_NOTES.md) file to get more details about our development process.
+
+
 
 ## License
 This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
